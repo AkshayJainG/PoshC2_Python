@@ -485,6 +485,7 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         destination = ""
         s = ""
         nothidden = False
+        tr
         if command == "upload-file":
             source = readfile_with_completion("Location of file to upload: ")
             while not os.path.isfile(source):
@@ -558,11 +559,10 @@ def handle_ps_command(command, user, randomuri, startup, createdaisypayload, cre
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
         check_module_loaded("Inject-Shellcode.ps1", randomuri, user)
-        readline.set_completer(shellcodefilecomplete)
-        path = input("Location of shellcode file: ")
-        t = tabCompleter()
-        t.createListCompleter(COMMANDS)
-        readline.set_completer(t.listCompleter)
+        try:
+            path = shellcodereadfile_with_completion("Location of shellcode file: ")
+        except KeyboardInterrupt:
+            handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload)
         try:
             shellcodefile = load_file(path)
             if shellcodefile is not None:

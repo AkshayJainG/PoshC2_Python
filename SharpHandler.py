@@ -78,7 +78,10 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
-        path = shellcodereadfile_with_completion("Location of shellcode file: ")
+        try:
+            path = shellcodereadfile_with_completion("Location of shellcode file: ")
+        except KeyboardInterrupt:
+            handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload)
         try:
             shellcodefile = load_file(path)
             if shellcodefile is not None:
