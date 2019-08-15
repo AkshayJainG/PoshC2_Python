@@ -5,12 +5,16 @@ from Utils import validate_sleep_time
 from DB import new_task, update_sleep, update_label, unhide_implant, kill_implant, get_implantdetails, get_sharpurls, select_item
 from AutoLoads import check_module_loaded, run_autoloads_sharp
 from Help import sharp_help1
-from Config import POSHDIR, ROOTDIR, SocksHost
+from Config import POSHDIR, ROOTDIR, SocksHost, PayloadsDirectory
 from Core import readfile_with_completion, shellcodereadfile_with_completion
 from Utils import argp, load_file, gen_key
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.styles import Style
+from CommandPromptCompleter import FilePathCompleter
 
-
-def handle_sharp_command(command, user, randomuri, startup):
+def handle_sharp_command(command, user, randomuri, startup, implant_id, commandloop):
 
     try:
         check_module_loaded("Stage2-Core.exe", randomuri, user)
@@ -78,10 +82,15 @@ def handle_sharp_command(command, user, randomuri, startup):
     elif command.startswith("inject-shellcode"):
         params = re.compile("inject-shellcode", re.IGNORECASE)
         params = params.sub("", command)
+        style = Style.from_dict({
+            '': '#80d130',
+        })
+        session = PromptSession(history=FileHistory('%s/.shellcode-history' % ROOTDIR), auto_suggest=AutoSuggestFromHistory(), style=style)
         try:
-            path = shellcodereadfile_with_completion("Location of shellcode file: ")
+            path = session.prompt("Location of shellcode file: ", completer=FilePathCompleter(PayloadsDirectory, glob="*.bin"))
+            path = PayloadsDirectory + path
         except KeyboardInterrupt:
-            handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload)
+            commandloop(implant_id, user)
         try:
             shellcodefile = load_file(path)
             if shellcodefile is not None:

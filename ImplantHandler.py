@@ -413,7 +413,7 @@ def startup(user, printhelp=""):
             startup(user)
 
 
-def runcommand(command, randomuri):
+def runcommand(command, randomuri, implant_id):
 
     if command == "creds":
         creds, hashes = parse_creds(get_creds())
@@ -453,10 +453,10 @@ def runcommand(command, randomuri):
         handle_py_command(command, user, randomuri, startup)
 
     elif implant_type.startswith("C#"):
-        handle_sharp_command(command, user, randomuri, startup)
+        handle_sharp_command(command, user, randomuri, startup, implant_id, commandloop)
 
     else:
-        handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload)
+        handle_ps_command(command, user, randomuri, startup, createdaisypayload, createproxypayload, implant_id, commandloop)
         return
 
 
@@ -491,14 +491,14 @@ def commandloop(implant_id, user):
                 implant_split = get_implants()
                 if implant_split:
                     for implant_id in implant_split:
-                        runcommand(command, implant_id[1])
+                        runcommand(command, implant_id[1], implant_id_orig)
 
             # if "seperated list" against single uri
             elif "," in implant_id:
                 implant_split = implant_id.split(",")
                 for implant_id in implant_split:
                     implant_id = get_randomuri(implant_id)
-                    runcommand(command, implant_id)
+                    runcommand(command, implant_id, implant_id_orig)
 
             # if "range" against single uri
             elif "-" in implant_id:
@@ -506,14 +506,14 @@ def commandloop(implant_id, user):
                 for implant_id in range(int(implant_split[0]), int(implant_split[1]) + 1):
                     try:
                         implant_id = get_randomuri(implant_id)
-                        runcommand(command, implant_id)
+                        runcommand(command, implant_id, implant_id_orig)
                     except Exception:
                         print("Unknown ImplantID")
 
             # else run against single uri
             else:
                 implant_id = get_randomuri(implant_id)
-                runcommand(command, implant_id)
+                runcommand(command, implant_id, implant_id_orig)
 
             # then run back around
             commandloop(implant_id_orig, user)
